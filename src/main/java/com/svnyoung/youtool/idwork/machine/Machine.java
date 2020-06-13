@@ -9,14 +9,42 @@ package com.svnyoung.youtool.idwork.machine;
  */
 public class Machine {
 
+    /**机器码**/
     private Integer code;
 
+    /**IP地址**/
     private String ip;
 
+    /**mac地址**/
     private String macAddress;
 
+    /**主机名**/
     private String hostname;
 
+    /**进程号**/
+    private Integer pid;
+
+    /**
+     * 进程序列号
+     * **/
+    private Integer pidSeq;
+
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public Integer getPidSeq() {
+        return pidSeq;
+    }
+
+    public void setPidSeq(Integer pidSeq) {
+        this.pidSeq = pidSeq;
+    }
 
     public Integer getCode() {
         return code;

@@ -12,7 +12,7 @@ import com.svnyoung.youtool.idwork.machine.DistributionMachine;
 public class ElasticSequence extends SnowFlakeSequence {
 
     public ElasticSequence(int nodeId, DistributionMachine distributionMachine) throws Exception {
-        super(nodeId, distributionMachine.getMachine().getCode());
+        super(nodeId, distributionMachine.getMachine().getCode(),distributionMachine.getMachine().getPidSeq());
     }
 
 }

@@ -28,6 +28,11 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
     private ZookeeperMachineProperties zookeeperMachineProperties;
 
 
+    @Override
+    protected Integer getPidSeq(String pid) {
+        return null;
+    }
+
     public ZookeeperDistributionMachine(ZookeeperMachineProperties zookeeperMachineProperties) throws Exception {
         this.zookeeperMachineProperties = zookeeperMachineProperties;
         this.init();
