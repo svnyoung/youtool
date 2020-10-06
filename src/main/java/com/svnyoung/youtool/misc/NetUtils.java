@@ -1,5 +1,6 @@
 package com.svnyoung.youtool.misc;
 
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -13,6 +14,29 @@ import java.util.Enumeration;
  */
 public class NetUtils {
 
+    /**
+     * @return 获取本机IP
+     * @throws SocketException
+     */
+    public static InetAddress getLocalInetAddress() throws SocketException {
+
+        Enumeration<NetworkInterface> netInterfaces =
+                NetworkInterface.getNetworkInterfaces();
+        InetAddress ip;
+        while (netInterfaces.hasMoreElements()) {
+            NetworkInterface ni = netInterfaces.nextElement();
+            Enumeration<InetAddress> address = ni.getInetAddresses();
+            while (address.hasMoreElements()) {
+                ip = address.nextElement();
+                if (!ip.isLoopbackAddress()
+                        // 外网IP
+                        && ip.getHostAddress().indexOf(":") == -1) {
+                     return ip;
+                }
+            }
+        }
+        return null;
+    }
 
 
 

@@ -1,6 +1,9 @@
 package com.svnyoung.youtool.idwork.machine;
 
 import com.svnyoung.youtool.misc.NetUtils;
+import com.svnyoung.youtool.misc.RuntimeUtils;
+
+import java.net.InetAddress;
 
 /**
  * @author: sunyang
@@ -13,13 +16,20 @@ public abstract class AbstractDistributionMachine implements DistributionMachine
 
     @Override
     public synchronized Machine getMachine() throws Exception{
-        String localMachine = getLocalMachineIdentity();
-        Machine machine = fetchMachine(localMachine);
+        String localMachine = this.getLocalMachineIdentity();
+        Machine machine = this.fetchMachine(localMachine);
         if(machine == null){
+            InetAddress inetAddress = NetUtils.getLocalInetAddress();
             machine = new Machine();
             Integer atomIncrement = this.atomIncrement();
+            machine.setMacAddress(localMachine);
+            machine.setIp(inetAddress.getHostAddress());
+            machine.setHostname(inetAddress.getHostName());
             machine.setCode(atomIncrement);
-            this.storeCode(localMachine,machine);
+            machine.setPid(RuntimeUtils.getPid());
+            this.coverIdentity(localMachine,machine);
+        }else {
+
         }
         return machine;
     }
@@ -29,10 +39,11 @@ public abstract class AbstractDistributionMachine implements DistributionMachine
      * 通过进程号获取进程序列
      * @date 2020/6/11 19:34
      * @param pid 进程号
+     * @param identity 主机身份
      * @return 
-     * @throws 
+     * @throws Exception
      */
-    protected abstract Integer getPidSeq(String pid);
+    protected abstract Integer getPidSeq(String identity,String pid) throws Exception;
 
 
     protected String getLocalMachineIdentity(){
@@ -69,8 +80,7 @@ public abstract class AbstractDistributionMachine implements DistributionMachine
      * @return
      * @throws Exception
      */
-    protected abstract void storeCode(String identity,Machine machine)throws Exception;
-
+    protected abstract void coverIdentity(String identity, Machine machine)throws Exception;
 
 
 

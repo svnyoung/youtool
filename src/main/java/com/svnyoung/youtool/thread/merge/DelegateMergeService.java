@@ -1,4 +1,4 @@
-package com.svnyoung.youtool.concurrent.merge;
+package com.svnyoung.youtool.thread.merge;
 
 
 import org.slf4j.Logger;

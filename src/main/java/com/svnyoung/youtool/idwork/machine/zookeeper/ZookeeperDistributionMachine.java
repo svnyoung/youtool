@@ -1,4 +1,4 @@
-package com.svnyoung.youtool.idwork.zookeeper;
+package com.svnyoung.youtool.idwork.machine.zookeeper;
 
 import com.svnyoung.youtool.idwork.machine.AbstractDistributionMachine;
 import com.svnyoung.youtool.idwork.machine.Machine;
@@ -29,7 +29,10 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
 
 
     @Override
-    protected Integer getPidSeq(String pid) {
+    protected Integer getPidSeq(String identity, String pid)  throws Exception{
+        client
+                .create().creatingParentContainersIfNeeded().forPath(String.format(zookeeperMachineProperties.getMachinePidFolder(),identity,pid));
+
         return null;
     }
 
@@ -56,11 +59,11 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
 
     @Override
     protected Machine fetchMachine(String identity) throws Exception {
-        Object isExists = client.checkExists().forPath(zookeeperMachineProperties.getMachineFolder() + identity);
+        Object isExists = client.checkExists().forPath(String.format(zookeeperMachineProperties.getMachineFolder() , identity));
         if (isExists == null) {
             return null;
         } else {
-            String machineStr = new String(client.getData().forPath(zookeeperMachineProperties.getMachineFolder() + identity));
+            String machineStr = new String(client.getData().forPath(String.format(zookeeperMachineProperties.getMachineFolder() , identity)));
             return this.buildMachine(machineStr);
         }
     }
@@ -95,8 +98,8 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
     }
 
     @Override
-    protected void storeCode(String identity, Machine machine) throws Exception {
-        String path = zookeeperMachineProperties.getMachineFolder() + identity;
+    protected void coverIdentity(String identity, Machine machine) throws Exception {
+        String path = String.format(zookeeperMachineProperties.getMachineFolder() , identity);
         Object isExists = client.checkExists().forPath(path);
         if (isExists == null) {
             client.create().creatingParentsIfNeeded().forPath(path, this.rebuildMachine(machine).getBytes());

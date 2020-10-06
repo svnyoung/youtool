@@ -1,4 +1,4 @@
-package com.svnyoung.youtool.idwork.zookeeper;
+package com.svnyoung.youtool.idwork.machine.zookeeper;
 
 /**
  * 通过Zookeeper方式配置获取机器码
@@ -35,7 +35,13 @@ public class ZookeeperMachineProperties {
     /**
      * 机器存放的文件夹
      * **/
-    private String machineFolder = "/idworker/machines/";
+    private String machineFolder = "/idworker/machines/%s";
+
+
+    /**
+     * 机器存放的文件夹
+     * **/
+    private String machinePidFolder = "/idworker/machines/%s/%s";
 
 
     /**
@@ -98,4 +104,13 @@ public class ZookeeperMachineProperties {
     public void setSequencePath(String sequencePath) {
         this.sequencePath = sequencePath;
     }
+
+    public String getMachinePidFolder() {
+        return machinePidFolder;
+    }
+
+    public void setMachinePidFolder(String machinePidFolder) {
+        this.machinePidFolder = machinePidFolder;
+    }
+
 }

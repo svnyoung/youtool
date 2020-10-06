@@ -10,9 +10,9 @@ import java.util.Calendar;
 /**
  * 该算法保证单节点ID生成的值越来越大，分布式节点数据不重复
  * <br><b> · </b>日期位，精确到日期 例如20181217
- * <br><b> · </b>对系统时间的依赖性非常强，时间如果出现越来越小的情况，开始执行时间修正位【0-9】，最大值为9，从9开始递减
- * <br><b> · </b>时分秒111213999
  *
+ * <br><b> · </b>对系统时间的依赖性非常强，时间如果出现越来越小的情况，开始执行时间修正位【0-7】，最大值为9，从7开始递减
+ * <br><b> · </b>28位时间位，时分秒111213999
  * <br><b> · </b>14位序列，毫秒内的计数，14位的计数顺序号支持每个节点每毫秒(同一机器，同一时间戳)产生16384个ID序号
  * <br><b> . </b>机房编号 4位最大值为15
  * <br><b> · </b>机器码 10位 最大值1023
@@ -24,6 +24,13 @@ import java.util.Calendar;
 public class SnowFlakeSequence implements Sequence {
 
     private static final Logger logger = LoggerFactory.getLogger(SnowFlakeSequence.class);
+
+
+    private final long reviseBits = 3;
+    /**
+     * 时间位，时间最大235959999,最大值268435456
+     * **/
+    private final long timeBits = 28;
 
     /**
      * 节点数，最大为32个
@@ -50,7 +57,7 @@ public class SnowFlakeSequence implements Sequence {
 
     private final static String STRING_FORMAT_04D = "%04d";
 
-    private final static String DATE_PATTEN = "yyyyMMddHHmmssSSS";
+    private final static String DATE_PATTEN = "yyyyMMdd";
 
     /**
      * 一天的毫秒数
@@ -62,6 +69,12 @@ public class SnowFlakeSequence implements Sequence {
      * 应用部署所占的位数最大为31 (从0开始)
      */
     private final long maxNodeId = -1L ^ -1L << this.nodeIdBites;
+
+
+    /**
+     * 应用部署所占的位数最大为31 (从0开始)
+     */
+    private final long maxTime = -1L ^ -1L << this.timeBits;
 
     /**
      * 应用部署所占的位数最大为31 (从0开始)
@@ -83,11 +96,22 @@ public class SnowFlakeSequence implements Sequence {
     /**
      * 最大修正位长度
      **/
-    private final long maxRevise = 9L;
+    private final long maxRevise = -1L ^ -1L << this.reviseBits;
+
+    /**
+     * time偏移量
+     **/
+    private final long reviseOffset = timeBits + sequenceBits + nodeIdBites + machineBits + pidSeqBits;
 
 
     /**
-     * 修正位偏移量
+     * time偏移量
+     **/
+    private final long timeOffset = sequenceBits + nodeIdBites + machineBits + pidSeqBits;
+
+
+    /**
+     * sequence偏移量
      **/
     private final long sequenceOffset = nodeIdBites + machineBits + pidSeqBits;
 
@@ -122,7 +146,7 @@ public class SnowFlakeSequence implements Sequence {
 
 
     /**
-     * 修正位，防止出现时间倒退的情况 （0~9）
+     * 修正位，防止出现时间倒退的情况 （0~7）
      */
     private long revise = maxRevise;
 
@@ -148,6 +172,7 @@ public class SnowFlakeSequence implements Sequence {
 
 
     public SnowFlakeSequence(int nodeId, int machineId, int pidSeq) {
+
         if (nodeId > this.maxNodeId || nodeId < 0) {
             String message = String.format("nodeId 不能大于 %d 或者小于 0", this.maxNodeId);
             throw new IllegalArgumentException(message);
@@ -163,7 +188,7 @@ public class SnowFlakeSequence implements Sequence {
         this.nodeId = nodeId;
         this.machineId = machineId;
         this.pidSeq = pidSeq;
-        long maxInc = maxSequence << sequenceOffset | maxNodeId << nodeOffset | maxMachineId << machineOffset | maxPidSeq;
+        long maxInc =revise << reviseOffset |  maxTime << timeOffset | maxSequence << sequenceOffset | maxNodeId << nodeOffset | maxMachineId << machineOffset | maxPidSeq;
         this.formatIncByMill = "%0" + String.valueOf(maxInc).length() + "d";
     }
 
@@ -198,7 +223,8 @@ public class SnowFlakeSequence implements Sequence {
             this.revise();
         }
         this.lastTimestamp = timestamp;
-        return sequence << sequenceOffset | nodeId << nodeOffset | machineId << machineOffset | pidSeq;
+
+        return revise << reviseOffset | timestamp % DAY_MSEC << timeOffset | sequence << sequenceOffset | nodeId << nodeOffset | machineId << machineOffset | pidSeq;
     }
 
     /***
@@ -227,7 +253,7 @@ public class SnowFlakeSequence implements Sequence {
         //追加时间戳
         StringBuilder sb = new StringBuilder();
         sb.append(dateToStr(timestamp));
-        sb.append(String.format(formatIncByMill, incByMill(timestamp)));
+        sb.append(String.format(formatIncByMill, this.incByMill(timestamp)));
         //追加每一毫秒不重复的值
         return sb.toString();
 
@@ -242,11 +268,12 @@ public class SnowFlakeSequence implements Sequence {
             Long valueSite = Long.parseLong(id.substring(18));
             values[0] = new SimpleDateFormat(DATE_PATTEN).parse(dateSite.toString()).getTime();
             //通过ascII 码减去30得到
-            values[1] = (int) dateSite.charAt(8) - 40;
-            values[2] = (valueSite >> sequenceOffset) & maxSequence;
-            values[3] = (valueSite >> nodeOffset) & maxNodeId;
-            values[4] = (valueSite >> machineOffset) & maxMachineId;
-            values[5] = valueSite & pidSeq;
+            values[1] = (valueSite >> reviseOffset) & maxRevise;
+            values[2] = (valueSite >> timeOffset) & maxTime;
+            values[3] = (valueSite >> sequenceOffset) & maxSequence;
+            values[4] = (valueSite >> nodeOffset) & maxNodeId;
+            values[5] = (valueSite >> machineOffset) & maxMachineId;
+            values[6] = valueSite & pidSeq;
         } catch (ParseException e) {
             logger.error("解析日期失败", e);
             throw new RuntimeException(e);
@@ -267,16 +294,6 @@ public class SnowFlakeSequence implements Sequence {
         sb.append(format02d(calendar.get(Calendar.MONTH) + 1));
         //追加日
         sb.append(format02d(calendar.get(Calendar.DATE)));
-        //追加时间修正
-        sb.append(revise);
-        //追加时
-        sb.append(format02d(calendar.get(Calendar.HOUR_OF_DAY)));
-        //追加分
-        sb.append(format02d(calendar.get(Calendar.MINUTE)));
-        //追加秒
-        sb.append(format02d(calendar.get(Calendar.SECOND)));
-        //追加毫秒
-        sb.append(format02d(calendar.get(Calendar.MILLISECOND)));
         return sb.toString();
     }
 
@@ -307,6 +324,10 @@ public class SnowFlakeSequence implements Sequence {
      */
     private long timeGen() {
         return System.currentTimeMillis();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(System.currentTimeMillis());
     }
 
 

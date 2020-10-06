@@ -24,11 +24,16 @@ public class Machine {
     /**进程号**/
     private Integer pid;
 
-    /**
-     * 进程序列号
-     * **/
     private Integer pidSeq;
 
+
+    public Integer getPidSeq() {
+        return pidSeq;
+    }
+
+    public void setPidSeq(Integer pidSeq) {
+        this.pidSeq = pidSeq;
+    }
 
     public Integer getPid() {
         return pid;
@@ -38,13 +43,6 @@ public class Machine {
         this.pid = pid;
     }
 
-    public Integer getPidSeq() {
-        return pidSeq;
-    }
-
-    public void setPidSeq(Integer pidSeq) {
-        this.pidSeq = pidSeq;
-    }
 
     public Integer getCode() {
         return code;

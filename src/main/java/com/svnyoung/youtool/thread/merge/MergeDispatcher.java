@@ -1,4 +1,4 @@
-package com.svnyoung.youtool.concurrent.merge;
+package com.svnyoung.youtool.thread.merge;
 
 import java.util.List;
 import java.util.Map;

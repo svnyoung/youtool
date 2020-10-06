@@ -1,4 +1,4 @@
-package com.svnyoung.youtool.concurrent.merge;
+package com.svnyoung.youtool.thread.merge;
 
 import java.util.concurrent.CompletableFuture;
 
