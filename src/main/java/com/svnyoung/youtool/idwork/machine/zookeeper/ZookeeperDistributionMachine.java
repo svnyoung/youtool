@@ -1,7 +1,7 @@
 package com.svnyoung.youtool.idwork.machine.zookeeper;
 
 import com.svnyoung.youtool.idwork.machine.AbstractDistributionMachine;
-import com.svnyoung.youtool.idwork.machine.Machine;
+import com.svnyoung.youtool.idwork.machine.MachineInfo;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.atomic.DistributedAtomicInteger;
@@ -58,7 +58,7 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
     }
 
     @Override
-    protected Machine fetchMachine(String identity) throws Exception {
+    protected MachineInfo fetchMachine(String identity) throws Exception {
         Object isExists = client.checkExists().forPath(String.format(zookeeperMachineProperties.getMachineFolder() , identity));
         if (isExists == null) {
             return null;
@@ -69,22 +69,22 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
     }
 
 
-    private Machine buildMachine(String line) {
+    private MachineInfo buildMachine(String line) {
         String[] machineArr = line.split(SYMBOL);
-        Machine machine = new Machine();
-        machine.setCode(Integer.parseInt(machineArr[0]));
-        machine.setHostname(machineArr[1]);
-        machine.setIp(machineArr[2]);
-        machine.setMacAddress(machineArr[3]);
-        return machine;
+        MachineInfo machineInfo = new MachineInfo();
+        machineInfo.setCode(Integer.parseInt(machineArr[0]));
+        machineInfo.setHostname(machineArr[1]);
+        machineInfo.setIp(machineArr[2]);
+        machineInfo.setMacAddress(machineArr[3]);
+        return machineInfo;
     }
 
-    private String rebuildMachine(Machine machine) {
+    private String rebuildMachine(MachineInfo machineInfo) {
         StringBuffer line = new StringBuffer();
-        line.append(machine.getCode()).append(SYMBOL)
-                .append(machine.getHostname()).append(SYMBOL)
-                .append(machine.getIp()).append(SYMBOL)
-                .append(machine.getMacAddress()).append(SYMBOL);
+        line.append(machineInfo.getCode()).append(SYMBOL)
+                .append(machineInfo.getHostname()).append(SYMBOL)
+                .append(machineInfo.getIp()).append(SYMBOL)
+                .append(machineInfo.getMacAddress()).append(SYMBOL);
         return line.toString();
     }
 
@@ -98,18 +98,18 @@ public class ZookeeperDistributionMachine extends AbstractDistributionMachine {
     }
 
     @Override
-    protected void coverIdentity(String identity, Machine machine) throws Exception {
+    protected void coverIdentity(String identity, MachineInfo machineInfo) throws Exception {
         String path = String.format(zookeeperMachineProperties.getMachineFolder() , identity);
         Object isExists = client.checkExists().forPath(path);
         if (isExists == null) {
-            client.create().creatingParentsIfNeeded().forPath(path, this.rebuildMachine(machine).getBytes());
+            client.create().creatingParentsIfNeeded().forPath(path, this.rebuildMachine(machineInfo).getBytes());
         } else {
-            client.setData().forPath(path, this.rebuildMachine(machine).getBytes());
+            client.setData().forPath(path, this.rebuildMachine(machineInfo).getBytes());
         }
     }
 
     @Override
-    public List<Machine> attainAll() {
+    public List<MachineInfo> attainAll() {
         return null;
     }
 }

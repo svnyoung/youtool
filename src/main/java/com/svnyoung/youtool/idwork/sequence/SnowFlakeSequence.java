@@ -326,9 +326,5 @@ public class SnowFlakeSequence implements Sequence {
         return System.currentTimeMillis();
     }
 
-    public static void main(String[] args) {
-        System.out.println(System.currentTimeMillis());
-    }
-
 
 }

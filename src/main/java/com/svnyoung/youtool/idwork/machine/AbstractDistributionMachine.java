@@ -15,23 +15,23 @@ import java.net.InetAddress;
 public abstract class AbstractDistributionMachine implements DistributionMachine {
 
     @Override
-    public synchronized Machine getMachine() throws Exception{
+    public synchronized MachineInfo getMachine() throws Exception{
         String localMachine = this.getLocalMachineIdentity();
-        Machine machine = this.fetchMachine(localMachine);
-        if(machine == null){
+        MachineInfo machineInfo = this.fetchMachine(localMachine);
+        if(machineInfo == null){
             InetAddress inetAddress = NetUtils.getLocalInetAddress();
-            machine = new Machine();
+            machineInfo = new MachineInfo();
             Integer atomIncrement = this.atomIncrement();
-            machine.setMacAddress(localMachine);
-            machine.setIp(inetAddress.getHostAddress());
-            machine.setHostname(inetAddress.getHostName());
-            machine.setCode(atomIncrement);
-            machine.setPid(RuntimeUtils.getPid());
-            this.coverIdentity(localMachine,machine);
+            machineInfo.setMacAddress(localMachine);
+            machineInfo.setIp(inetAddress.getHostAddress());
+            machineInfo.setHostname(inetAddress.getHostName());
+            machineInfo.setCode(atomIncrement);
+            machineInfo.setPid(RuntimeUtils.getPid());
+            this.coverIdentity(localMachine, machineInfo);
         }else {
 
         }
-        return machine;
+        return machineInfo;
     }
 
 
@@ -59,7 +59,7 @@ public abstract class AbstractDistributionMachine implements DistributionMachine
      * @return
      * @throws Exception
      */
-    protected abstract Machine fetchMachine(String identity) throws Exception;
+    protected abstract MachineInfo fetchMachine(String identity) throws Exception;
 
     /**
      *  原子增长
@@ -76,11 +76,11 @@ public abstract class AbstractDistributionMachine implements DistributionMachine
      * 存放机器码
      * @date 2019/7/17 15:40
      * @param identity 机器的身份
-     * @param machine 机器
+     * @param machineInfo 机器
      * @return
      * @throws Exception
      */
-    protected abstract void coverIdentity(String identity, Machine machine)throws Exception;
+    protected abstract void coverIdentity(String identity, MachineInfo machineInfo)throws Exception;
 
 
 

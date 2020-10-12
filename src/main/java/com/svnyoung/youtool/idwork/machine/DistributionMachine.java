@@ -22,7 +22,7 @@ public interface DistributionMachine {
      * @return
      * @throws Exception 获取code
      */
-    Machine getMachine() throws Exception;
+    MachineInfo getMachine() throws Exception;
 
 
 
@@ -33,7 +33,7 @@ public interface DistributionMachine {
      * @return 
      * @throws 
      */
-    List<Machine> attainAll();
+    List<MachineInfo> attainAll();
 
 
 

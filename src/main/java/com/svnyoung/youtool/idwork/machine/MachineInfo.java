@@ -7,7 +7,7 @@ package com.svnyoung.youtool.idwork.machine;
  * @since: 1.0
  * @see:
  */
-public class Machine {
+public class MachineInfo {
 
     /**机器码**/
     private Integer code;
